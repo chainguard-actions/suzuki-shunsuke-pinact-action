@@ -1,5 +1,7 @@
 # suzuki-shunsuke/pinact-action
 
+GitHub Actions to pin GitHub Actions by pinact
+
 Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at [https://github.com/suzuki-shunsuke/pinact-action](https://github.com/suzuki-shunsuke/pinact-action).
 
 ## Versions
