@@ -1,7 +1,0 @@
-{
-  "owner": "suzuki-shunsuke",
-  "name": "pinact-action",
-  "visibility": "internal",
-  "description": "GitHub Actions to pin GitHub Actions by pinact",
-  "block_publish": false
-}
