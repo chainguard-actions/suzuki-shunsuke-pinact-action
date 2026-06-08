@@ -1,0 +1,24 @@
+name: Test basic usage
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          github_token: ${{ github.token }}
+          fix: "false"
+          no_api: "true"
+          skip_push: "true"
+          update: "false"
+          verify: "false"
+      - name: Assert action completed
+        run: |
+          echo "Action completed successfully"
+          echo "PASS"
