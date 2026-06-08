@@ -1,6 +1,6 @@
 # suzuki-shunsuke/pinact-action
 
-GitHub Actions to pin GitHub Actions by pinact
+Pin GitHub Actions and reusable workflows by pinact
 
 Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at [https://github.com/suzuki-shunsuke/pinact-action](https://github.com/suzuki-shunsuke/pinact-action).
 
@@ -9,6 +9,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | Version | Tag | Upstream commit |
 |---------|-----|-----------------|
 | v2.0.0 | [`v2.0.0`](https://github.com/chainguard-actions/suzuki-shunsuke-pinact-action/tree/v2.0.0) | — |
+| v3.0.0 | [`v3.0.0`](https://github.com/chainguard-actions/suzuki-shunsuke-pinact-action/tree/v3.0.0) | [`896d595`](https://github.com/suzuki-shunsuke/pinact-action/commit/896d595f299e71d65b9d28349d6956abe144390a) |
 
 ## Privacy
 
