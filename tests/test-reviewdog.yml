@@ -1,26 +1,30 @@
-name: Test securefix inputs
+name: Test reviewdog inputs
 on:
   workflow_dispatch:
 jobs:
   test:
     runs-on: ubuntu-latest
     env:
-      GITHUB_REF: refs/heads/main
-      GITHUB_EVENT_NAME: push
+      GITHUB_REF: refs/pull/1/merge
+      GITHUB_EVENT_NAME: pull_request
+      GITHUB_HEAD_REF: feature-branch
+      GITHUB_BASE_REF: main
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
       - id: action
         uses: .
         with:
           github_token: ${{ github.token }}
-          securefix_app_id: "12345"
-          securefix_app_private_key: "dummy-private-key"
-          securefix_server_repository: "owner/repo"
+          github_token_for_review: ${{ github.token }}
           fix: "false"
           no_api: "true"
           skip_push: "true"
+          review: "false"
+          reviewdog_filter_mode: "added"
+          reviewdog_fail_level: "error"
+          reviewdog_level: "warning"
         continue-on-error: true
       - name: Assert action ran
         run: |
-          echo "Action completed with securefix inputs"
+          echo "Action completed with reviewdog inputs"
           echo "PASS"

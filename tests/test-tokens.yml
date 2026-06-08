@@ -1,4 +1,4 @@
-name: Test securefix inputs
+name: Test token inputs
 on:
   workflow_dispatch:
 jobs:
@@ -13,14 +13,13 @@ jobs:
         uses: .
         with:
           github_token: ${{ github.token }}
-          securefix_app_id: "12345"
-          securefix_app_private_key: "dummy-private-key"
-          securefix_server_repository: "owner/repo"
+          github_token_for_push: ${{ github.token }}
+          github_token_for_review: ${{ github.token }}
           fix: "false"
           no_api: "true"
           skip_push: "true"
         continue-on-error: true
       - name: Assert action ran
         run: |
-          echo "Action completed with securefix inputs"
+          echo "Action completed with token inputs"
           echo "PASS"

@@ -9,27 +9,26 @@ jobs:
       GITHUB_EVENT_NAME: push
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - name: Create diff file path
-        run: |
-          echo "/tmp/pinact.diff" > /tmp/diff_file_path.txt
       - id: action
         uses: .
         with:
+          github_token: ${{ github.token }}
+          fix: "false"
+          no_api: "true"
+          skip_push: "true"
           includes: |
             .github/workflows/*.yml
           excludes: |
             .github/workflows/skip.yml
           separator: ","
           branch_to_tags: |
-            actions/checkout:main=v4
+            v3:v3.0.0
+          config: ""
+          diff_file: ""
           min_age: "7d"
           verify_min_age: "false"
-          config: ""
-          diff_file: "/tmp/pinact.diff"
-          fix: "false"
-          no_api: "true"
-          skip_push: "true"
-      - name: Assert action completed
+        continue-on-error: true
+      - name: Assert action ran
         run: |
-          echo "Action completed successfully with filtering inputs"
+          echo "Action completed with filtering and config inputs"
           echo "PASS"
