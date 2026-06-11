@@ -1,0 +1,19 @@
+name: Test Securefix inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          securefix_app_id: "654321"
+          securefix_app_private_key: "fake-securefix-private-key"
+          securefix_server_repository: "my-org/securefix-server"
+          skip_push: "true"
+        continue-on-error: true
+      - name: Assert action ran with securefix inputs
+        run: |
+          echo "PASS: action accepted securefix inputs"

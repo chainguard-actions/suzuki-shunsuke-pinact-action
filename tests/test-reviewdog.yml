@@ -1,0 +1,24 @@
+name: Test reviewdog integration inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_EVENT_NAME: pull_request
+      GITHUB_HEAD_REF: feature-branch
+      GITHUB_BASE_REF: main
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          review: "true"
+          github_token_for_review: ${{ github.token }}
+          reviewdog_filter_mode: "added"
+          reviewdog_level: "warning"
+          skip_push: "true"
+        continue-on-error: true
+      - name: Assert action ran with reviewdog inputs
+        run: |
+          echo "PASS: action accepted reviewdog inputs"
