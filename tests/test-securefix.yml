@@ -1,4 +1,4 @@
-name: Test securefix inputs
+name: Test Securefix inputs
 on:
   workflow_dispatch:
 jobs:
@@ -12,15 +12,14 @@ jobs:
       - id: action
         uses: .
         with:
-          github_token: ${{ github.token }}
-          securefix_app_id: "12345"
-          securefix_app_private_key: "dummy-private-key"
-          securefix_server_repository: "owner/repo"
+          securefix_app_id: "789012"
+          securefix_app_private_key: "dummy-securefix-private-key"
+          securefix_server_repository: "my-org/securefix-server"
           fix: "false"
           no_api: "true"
           skip_push: "true"
         continue-on-error: true
       - name: Assert action ran
         run: |
-          echo "Action completed with securefix inputs"
+          echo "Action completed with securefix inputs (errors expected without real credentials)"
           echo "PASS"

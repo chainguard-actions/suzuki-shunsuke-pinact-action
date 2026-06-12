@@ -1,4 +1,4 @@
-name: Test GitHub App auth inputs
+name: Test GitHub App authentication inputs
 on:
   workflow_dispatch:
 jobs:
@@ -12,7 +12,7 @@ jobs:
       - id: action
         uses: .
         with:
-          app_id: "12345"
+          app_id: "123456"
           app_private_key: "dummy-private-key"
           fix: "false"
           no_api: "true"
@@ -20,5 +20,5 @@ jobs:
         continue-on-error: true
       - name: Assert action ran
         run: |
-          echo "Action completed with GitHub App auth inputs"
+          echo "Action completed with app auth inputs (errors expected without real app credentials)"
           echo "PASS"

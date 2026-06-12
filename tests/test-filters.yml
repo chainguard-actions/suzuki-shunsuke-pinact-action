@@ -1,4 +1,4 @@
-name: Test token inputs
+name: Test filter and path inputs
 on:
   workflow_dispatch:
 jobs:
@@ -12,14 +12,21 @@ jobs:
       - id: action
         uses: .
         with:
-          github_token: "dummy-token"
-          github_token_for_push: "dummy-push-token"
-          github_token_for_review: "dummy-review-token"
+          includes: |
+            .github/workflows/*.yml
+          excludes: |
+            .github/workflows/skip.yml
+          separator: ","
+          branch_to_tags: |
+            actions/checkout:main=v4
+          min_age: "7d"
+          config: ".pinact.yml"
+          diff_file: "/tmp/pinact.diff"
           fix: "false"
           no_api: "true"
           skip_push: "true"
         continue-on-error: true
       - name: Assert action ran
         run: |
-          echo "Action completed with token inputs (errors expected without real tokens)"
+          echo "Action completed with filter inputs (errors expected without real token)"
           echo "PASS"

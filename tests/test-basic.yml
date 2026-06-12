@@ -12,7 +12,6 @@ jobs:
       - id: action
         uses: .
         with:
-          github_token: ${{ github.token }}
           fix: "false"
           no_api: "true"
           skip_push: "true"
@@ -21,5 +20,5 @@ jobs:
         continue-on-error: true
       - name: Assert action ran
         run: |
-          echo "Action completed (may have errored due to no workflow files to pin, which is acceptable)"
+          echo "Action completed (exit may be non-zero without real token, that is expected)"
           echo "PASS"
