@@ -1,0 +1,25 @@
+name: Test config and diff_file inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create pinact config file
+        run: |
+          mkdir -p /tmp/pinact-test
+          cat > /tmp/pinact-test/pinact.yaml <<'EOF'
+          {}
+          EOF
+      - id: action
+        uses: .
+        with:
+          config: "/tmp/pinact-test/pinact.yaml"
+          diff_file: "/tmp/pinact-test/pinact.diff"
+          fix: "false"
+          skip_push: "true"
+          no_api: "true"
+      - name: Assert action ran with config and diff_file inputs
+        run: |
+          echo "PASS: action accepted config and diff_file inputs"

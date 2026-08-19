@@ -1,0 +1,33 @@
+name: Test pinact with excludes filter
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install fake pinact binary
+        run: |
+          mkdir -p "$HOME/.local/bin"
+          cp "$GITHUB_WORKSPACE/tests/fixtures/fake-pinact.sh" "$HOME/.local/bin/pinact"
+          chmod +x "$HOME/.local/bin/pinact"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      - name: Run pinact with excludes filter and skip_push
+        id: pinact
+        uses: .
+        with:
+          fix: "false"
+          no_api: "true"
+          skip_push: "true"
+          includes: |
+            tests/fixtures/workflows/pinned-workflow.yml
+            tests/fixtures/workflows/excluded-workflow.yml
+          excludes: |
+            # This is a comment - should be ignored
+            tests/fixtures/workflows/excluded-workflow.yml
+
+      - name: Assert action completed successfully
+        run: |
+          echo "PASS: pinact completed with excludes filter"

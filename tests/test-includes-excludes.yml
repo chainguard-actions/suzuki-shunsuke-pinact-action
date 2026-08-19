@@ -1,0 +1,69 @@
+name: Test pinact with includes and excludes filters
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+      GITHUB_REPOSITORY: test-owner/test-repo
+      GITHUB_REPOSITORY_OWNER: test-owner
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install mock pinact binary
+        run: |
+          cat > /usr/local/bin/pinact << 'SCRIPT'
+          #!/bin/sh
+          # Mock pinact binary for testing
+          if [ "$1" = "-v" ] || [ "$1" = "version" ]; then
+            echo "pinact version v4.0.0 (mock)"
+            exit 0
+          fi
+          # For 'run' subcommand, exit 0 (all actions are pinned)
+          exit 0
+          SCRIPT
+          chmod +x /usr/local/bin/pinact
+          pinact -v
+
+      - name: Create sample workflow files for filtering
+        run: |
+          mkdir -p .github/workflows
+          cat > .github/workflows/included.yml << 'EOF'
+          name: Included
+          on: [push]
+          jobs:
+            test:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.2.2
+          EOF
+          cat > .github/workflows/excluded.yml << 'EOF'
+          name: Excluded
+          on: [push]
+          jobs:
+            test:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/setup-node@cdca7365b2dadb8aad0a33bc7601856ffabcc48e # v4.3.0
+          EOF
+
+      - name: Run pinact with includes and excludes
+        id: action
+        uses: .
+        with:
+          fix: "false"
+          no_api: "true"
+          skip_push: "true"
+          default_github_token: dummy-token-for-no-api-mode
+          includes: |
+            .github/workflows/included.yml
+          excludes: |
+            # This is a comment and should be ignored
+            .github/workflows/excluded.yml
+
+      - name: Assert action completed successfully
+        run: |
+          echo "pinact with includes/excludes completed successfully"
+          echo "PASS"

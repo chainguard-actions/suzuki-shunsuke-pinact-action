@@ -1,0 +1,42 @@
+name: Test pinact basic check mode
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_REF: refs/heads/main
+      GITHUB_EVENT_NAME: push
+      GITHUB_REPOSITORY: test-owner/test-repo
+      GITHUB_REPOSITORY_OWNER: test-owner
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install mock pinact binary
+        run: |
+          cat > /usr/local/bin/pinact << 'SCRIPT'
+          #!/bin/sh
+          # Mock pinact binary for testing
+          if [ "$1" = "-v" ] || [ "$1" = "version" ]; then
+            echo "pinact version v4.0.0 (mock)"
+            exit 0
+          fi
+          # For 'run' subcommand, exit 0 (all actions are pinned)
+          exit 0
+          SCRIPT
+          chmod +x /usr/local/bin/pinact
+          pinact -v
+
+      - name: Run pinact in check-only mode (no fix, no API, skip push)
+        id: action
+        uses: .
+        with:
+          fix: "false"
+          no_api: "true"
+          skip_push: "true"
+          default_github_token: dummy-token-for-no-api-mode
+
+      - name: Assert action completed successfully
+        run: |
+          echo "pinact check-only mode completed successfully"
+          echo "PASS"

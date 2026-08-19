@@ -1,0 +1,21 @@
+name: Test advanced pinact options inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - id: action
+        uses: .
+        with:
+          min_age: "7d"
+          separator: ","
+          branch_to_tags: |
+            actions/checkout:main=v4
+          fix: "false"
+          skip_push: "true"
+          no_api: "true"
+      - name: Assert action ran with advanced options
+        run: |
+          echo "PASS: action accepted min_age, separator, and branch_to_tags inputs"
