@@ -1,0 +1,38 @@
+name: Test pinact with no target workflow files
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Remove all workflow files from git index so the action finds no targets
+      # The action uses git ls-files to find .github/workflows/*.yml files
+      - name: Remove workflow files from git index
+        run: |
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          # Remove all tracked workflow files from the index (but keep them on disk)
+          git ls-files .github/workflows/ | xargs -r git rm --cached
+          # Also remove any action.yml/action.yaml files from the index
+          git ls-files | grep -E '(^|/)action\.(yml|yaml)$' | xargs -r git rm --cached
+          git commit -m "remove workflow files from index for test" --allow-empty
+
+      # The action should notice "No target files found" and exit cleanly
+      - id: action
+        uses: .
+        with:
+          skip_push: "true"
+
+      - name: Assert action succeeded with no target files
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded gracefully with no target files"
+          else
+            echo "FAIL: expected success but got '$OUTCOME'"
+            exit 1
+          fi

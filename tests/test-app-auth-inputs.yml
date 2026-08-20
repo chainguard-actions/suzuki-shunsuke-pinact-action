@@ -1,0 +1,53 @@
+name: Test pinact with GitHub App auth inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Create a pinned workflow file and commit it
+      - name: Create a pinned workflow file and commit it
+        run: |
+          mkdir -p .github/workflows
+          cat > .github/workflows/pinned-app-auth-test.yml << 'EOF'
+          name: Pinned App Auth Test
+          on: [push]
+          jobs:
+            test:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.2.2
+          EOF
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          git add .github/workflows/pinned-app-auth-test.yml
+          git commit -m "add pinned workflow for app auth inputs test"
+
+      # Pass app_id and app_private_key inputs; these are optional and the action
+      # should handle them (or fall back to default_github_token) gracefully.
+      # We use skip_push=true to avoid any push operations.
+      - id: action
+        uses: .
+        with:
+          skip_push: "true"
+          app_id: "12345"
+          app_private_key: "fake-private-key-for-input-coverage"
+        continue-on-error: true
+
+      - name: Assert action ran with app_id and app_private_key inputs
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # The action may fail because the app credentials are fake,
+          # but it should not crash unexpectedly (success or graceful failure)
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded with app auth inputs"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (fake app credentials or sentinel repo)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

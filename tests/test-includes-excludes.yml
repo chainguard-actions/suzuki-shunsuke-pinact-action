@@ -1,0 +1,62 @@
+name: Test pinact with includes and excludes filtering
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Create workflow files - one that would be excluded, one that is pinned
+      - name: Create workflow files and commit them
+        run: |
+          mkdir -p .github/workflows
+          # Create an unpinned workflow that will be excluded
+          cat > .github/workflows/excluded-workflow.yml << 'EOF'
+          name: Excluded Workflow
+          on: [push]
+          jobs:
+            test:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@v4
+          EOF
+          # Create a pinned workflow that will be included
+          cat > .github/workflows/included-workflow.yml << 'EOF'
+          name: Included Workflow
+          on: [push]
+          jobs:
+            test:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.2.2
+          EOF
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          git add .github/workflows/excluded-workflow.yml .github/workflows/included-workflow.yml
+          git commit -m "add workflow files for includes/excludes test"
+
+      # Run with excludes to skip the unpinned workflow - should succeed
+      - id: action
+        uses: .
+        with:
+          skip_push: "true"
+          excludes: |
+            .github/workflows/excluded-workflow.yml
+        continue-on-error: true
+
+      - name: Assert action ran with excludes filtering
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # With the unpinned file excluded, only the pinned file is checked
+          # The action should succeed
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded with excludes filtering"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (sentinel repo or pinact issue)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

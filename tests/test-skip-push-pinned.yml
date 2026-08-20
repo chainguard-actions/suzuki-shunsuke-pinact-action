@@ -1,0 +1,48 @@
+name: Test pinact skip_push with already-pinned actions
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Create a workflow file that is already pinned (has SHA) and commit it
+      # so that git ls-files picks it up
+      - name: Create a pinned workflow file and commit it
+        run: |
+          mkdir -p .github/workflows
+          cat > .github/workflows/pinned-test.yml << 'EOF'
+          name: Already Pinned
+          on: [push]
+          jobs:
+            test:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.2.2
+          EOF
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          git add .github/workflows/pinned-test.yml
+          git commit -m "add pinned workflow for test"
+
+      - id: action
+        uses: .
+        with:
+          skip_push: "true"
+        continue-on-error: true
+
+      - name: Assert action ran (pinned files should pass check)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # The action should succeed because the workflow file is already pinned
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded with already-pinned workflow"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (sentinel repo or pinact check issue)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

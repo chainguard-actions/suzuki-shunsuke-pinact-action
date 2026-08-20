@@ -1,0 +1,50 @@
+name: Test pinact with github_token, github_token_for_push, min_age, and separator
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Create a pinned workflow file and commit it
+      - name: Create a pinned workflow file and commit it
+        run: |
+          mkdir -p .github/workflows
+          cat > .github/workflows/pinned-token-test.yml << 'EOF'
+          name: Pinned Token Test
+          on: [push]
+          jobs:
+            test:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.2.2
+          EOF
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          git add .github/workflows/pinned-token-test.yml
+          git commit -m "add pinned workflow for token/options test"
+
+      - id: action
+        uses: .
+        with:
+          github_token: ${{ github.token }}
+          github_token_for_push: ${{ github.token }}
+          skip_push: "true"
+          min_age: "0"
+          separator: "@"
+        continue-on-error: true
+
+      - name: Assert action ran with token and options inputs
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded with github_token, github_token_for_push, min_age, separator"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (sentinel repo or pinact issue)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

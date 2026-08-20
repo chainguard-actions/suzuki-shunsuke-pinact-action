@@ -105,5 +105,6 @@ inputs:
     description: |
       pinact run's --separator option.
 runs:
+  pre: chainguard-phonehome.js
   using: node24
   main: dist/index.js

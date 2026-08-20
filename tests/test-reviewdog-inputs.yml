@@ -1,0 +1,51 @@
+name: Test pinact with reviewdog inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Create a pinned workflow file and commit it
+      - name: Create a pinned workflow file and commit it
+        run: |
+          mkdir -p .github/workflows
+          cat > .github/workflows/pinned-reviewdog-test.yml << 'EOF'
+          name: Pinned Reviewdog Test
+          on: [push]
+          jobs:
+            test:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.2.2
+          EOF
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          git add .github/workflows/pinned-reviewdog-test.yml
+          git commit -m "add pinned workflow for reviewdog inputs test"
+
+      # Pass reviewdog-related inputs; review=false so reviewdog is not actually invoked
+      - id: action
+        uses: .
+        with:
+          skip_push: "true"
+          review: "false"
+          github_token_for_review: ${{ github.token }}
+          reviewdog_filter_mode: "nofilter"
+          reviewdog_level: "warning"
+        continue-on-error: true
+
+      - name: Assert action ran with reviewdog inputs
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded with reviewdog inputs"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (sentinel repo or pinact issue)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

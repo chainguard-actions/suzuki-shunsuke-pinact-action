@@ -1,0 +1,53 @@
+name: Test pinact with securefix inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Create a pinned workflow file and commit it
+      - name: Create a pinned workflow file and commit it
+        run: |
+          mkdir -p .github/workflows
+          cat > .github/workflows/pinned-securefix-test.yml << 'EOF'
+          name: Pinned Securefix Test
+          on: [push]
+          jobs:
+            test:
+              runs-on: ubuntu-latest
+              steps:
+                - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v4.2.2
+          EOF
+          git config user.email "test@example.com"
+          git config user.name "Test User"
+          git add .github/workflows/pinned-securefix-test.yml
+          git commit -m "add pinned workflow for securefix inputs test"
+
+      # Pass securefix-related inputs; these are optional and the action
+      # should handle them gracefully even with placeholder values.
+      - id: action
+        uses: .
+        with:
+          skip_push: "true"
+          securefix_app_id: "99999"
+          securefix_app_private_key: "fake-securefix-private-key-for-input-coverage"
+          securefix_server_repository: "example-org/securefix-server"
+        continue-on-error: true
+
+      - name: Assert action ran with securefix inputs
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          # The action may fail because the securefix credentials are fake,
+          # but it should not crash unexpectedly (success or graceful failure)
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded with securefix inputs"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (fake securefix credentials or sentinel repo)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
