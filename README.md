@@ -8,7 +8,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 
 | Version | Tag | Upstream commit |
 |---------|-----|-----------------|
-| v2.0.0 | [`v2.0.0`](https://github.com/chainguard-actions/suzuki-shunsuke-pinact-action/tree/v2.0.0) | — |
+| v2.0.0 | [`v2.0.0`](https://github.com/chainguard-actions/suzuki-shunsuke-pinact-action/tree/v2.0.0) | [`cf51507`](https://github.com/suzuki-shunsuke/pinact-action/commit/cf51507d80d4d6522a07348e3d58790290eaf0b6) |
 | v3.0.0 | [`v3.0.0`](https://github.com/chainguard-actions/suzuki-shunsuke-pinact-action/tree/v3.0.0) | [`896d595`](https://github.com/suzuki-shunsuke/pinact-action/commit/896d595f299e71d65b9d28349d6956abe144390a) |
 
 ## Privacy
