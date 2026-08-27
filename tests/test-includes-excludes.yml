@@ -1,0 +1,53 @@
+name: Test includes and excludes inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Install a fake pinact binary so the action skips aqua installation
+      # and uses our controlled mock instead of downloading the real binary.
+      - name: Install fake pinact
+        run: |
+          set -euo pipefail
+          FAKE_BIN_DIR="$HOME/.local/bin/fake-pinact-dir"
+          mkdir -p "$FAKE_BIN_DIR"
+          cp tests/fixtures/fake-pinact.sh "$FAKE_BIN_DIR/pinact"
+          chmod +x "$FAKE_BIN_DIR/pinact"
+          echo "$FAKE_BIN_DIR" >> "$GITHUB_PATH"
+          echo "Fake pinact installed at $FAKE_BIN_DIR/pinact"
+
+      # Verify fake pinact is on PATH
+      - name: Verify fake pinact
+        run: |
+          which pinact
+          pinact -v
+
+      # Set up fixture workflow files
+      - name: Set up fixture workflow files
+        run: |
+          mkdir -p .github/workflows
+          cp tests/fixtures/workflows/already-pinned.yml .github/workflows/already-pinned.yml
+          echo "Fixture file contents:"
+          cat .github/workflows/already-pinned.yml
+
+      # Use includes to only check the already-pinned file, and excludes to skip nothing
+      # With no_api=true and fix=false, this should succeed
+      - id: action
+        uses: .
+        with:
+          github_token: ${{ github.token }}
+          fix: "false"
+          no_api: "true"
+          includes: |
+            .github/workflows/already-pinned.yml
+            # This comment line should be ignored
+          excludes: |
+            # This comment line should be ignored
+
+      - name: Assert action succeeded with includes/excludes
+        run: |
+          echo "Action completed successfully with includes/excludes inputs"
+          echo "PASS"

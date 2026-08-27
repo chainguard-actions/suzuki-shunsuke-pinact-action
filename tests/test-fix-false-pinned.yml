@@ -1,0 +1,50 @@
+name: Test fix=false on already-pinned workflow
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Install a fake pinact binary so the action skips aqua installation
+      # and uses our controlled mock instead of downloading the real binary.
+      - name: Install fake pinact
+        run: |
+          set -euo pipefail
+          FAKE_BIN_DIR="$HOME/.local/bin/fake-pinact-dir"
+          mkdir -p "$FAKE_BIN_DIR"
+          cp tests/fixtures/fake-pinact.sh "$FAKE_BIN_DIR/pinact"
+          chmod +x "$FAKE_BIN_DIR/pinact"
+          echo "$FAKE_BIN_DIR" >> "$GITHUB_PATH"
+          echo "Fake pinact installed at $FAKE_BIN_DIR/pinact"
+
+      # Verify fake pinact is on PATH
+      - name: Verify fake pinact
+        run: |
+          which pinact
+          pinact -v
+
+      # Copy the already-pinned fixture workflow into .github/workflows
+      - name: Set up already-pinned fixture workflow file
+        run: |
+          mkdir -p .github/workflows
+          cp tests/fixtures/workflows/already-pinned.yml .github/workflows/already-pinned.yml
+          echo "Fixture file contents:"
+          cat .github/workflows/already-pinned.yml
+
+      # fix=false means pinact only checks, does not modify files
+      # no_api=true avoids GitHub API calls
+      - id: action
+        uses: .
+        with:
+          github_token: ${{ github.token }}
+          fix: "false"
+          no_api: "true"
+          includes: |
+            .github/workflows/already-pinned.yml
+
+      - name: Assert action succeeded
+        run: |
+          echo "Action completed successfully in fix=false mode with already-pinned workflow"
+          echo "PASS"

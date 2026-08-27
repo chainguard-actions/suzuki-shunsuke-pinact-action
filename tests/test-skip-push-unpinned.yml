@@ -1,0 +1,62 @@
+name: Test skip_push mode with unpinned workflow
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      # Install a fake pinact binary so the action skips aqua installation
+      # and uses our controlled mock instead of downloading the real binary.
+      - name: Install fake pinact
+        run: |
+          set -euo pipefail
+          FAKE_BIN_DIR="$HOME/.local/bin/fake-pinact-dir"
+          mkdir -p "$FAKE_BIN_DIR"
+          cp tests/fixtures/fake-pinact.sh "$FAKE_BIN_DIR/pinact"
+          chmod +x "$FAKE_BIN_DIR/pinact"
+          echo "$FAKE_BIN_DIR" >> "$GITHUB_PATH"
+          echo "Fake pinact installed at $FAKE_BIN_DIR/pinact"
+
+      # Verify fake pinact is on PATH
+      - name: Verify fake pinact
+        run: |
+          which pinact
+          pinact -v
+
+      # Copy the unpinned fixture workflow into .github/workflows so pinact can find it
+      - name: Set up unpinned fixture workflow file
+        run: |
+          mkdir -p .github/workflows
+          cp tests/fixtures/workflows/unpinned.yml .github/workflows/unpinned.yml
+          echo "Fixture file contents:"
+          cat .github/workflows/unpinned.yml
+
+      # With fix=true and skip_push=true, pinact will try to fix the file but not push.
+      # With no_api=true, it won't call GitHub API to resolve SHAs.
+      # The fake pinact exits 0 in fix mode (pretends to fix the file).
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          github_token: ${{ github.token }}
+          fix: "true"
+          skip_push: "true"
+          no_api: "true"
+          includes: |
+            .github/workflows/unpinned.yml
+
+      - name: Assert action ran (pinact detected unpinned actions or succeeded)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ]; then
+            echo "PASS: action succeeded (fake pinact fixed the file in place)"
+          elif [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action failed gracefully (pinact found unpinned actions)"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi

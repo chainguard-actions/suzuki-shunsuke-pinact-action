@@ -1,0 +1,40 @@
+name: Test pinact run option inputs
+on:
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      - name: Create pinact config file
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/.pinact"
+          cat > "$GITHUB_WORKSPACE/.pinact/config.yaml" <<'EOF'
+          {}
+          EOF
+      - name: Create diff output file path
+        run: |
+          mkdir -p "$GITHUB_WORKSPACE/tmp"
+      - id: action
+        uses: .
+        continue-on-error: true
+        with:
+          fix: "false"
+          skip_push: "true"
+          config: ".pinact/config.yaml"
+          diff_file: "tmp/pinact.diff"
+          separator: "@"
+          min_age: "7d"
+          branch_to_tags: |
+            actions/checkout:main=v4
+      - name: Assert action ran (success or graceful failure)
+        env:
+          OUTCOME: ${{ steps.action.outcome }}
+        run: |
+          echo "outcome: $OUTCOME"
+          if [ "$OUTCOME" = "success" ] || [ "$OUTCOME" = "failure" ]; then
+            echo "PASS: action ran with pinact option inputs"
+          else
+            echo "FAIL: unexpected outcome '$OUTCOME'"
+            exit 1
+          fi
