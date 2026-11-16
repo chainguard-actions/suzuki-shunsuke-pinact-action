@@ -1,0 +1,199 @@
+name: pinact
+description: Pin GitHub Actions and reusable workflows by pinact
+author: Shunsuke Suzuki
+branding:
+  icon: git-commit
+  color: blue
+inputs:
+  default_github_token:
+    description: |
+      GitHub Access Token
+      contents:write - Push commits
+    required: false
+    default: ${{github.token}}
+  github_token:
+    description: |
+      GitHub Access Token
+      contents:write - Push commits
+    required: false
+  github_token_for_push:
+    description: |
+      GitHub Access Token for pushing commits.
+      Falls back to github_token if not specified.
+      contents:write - Push commits
+    required: false
+
+  app_id:
+    description: |
+      GitHub App ID.
+      Either client_id or app_id identifies the app.
+    required: false
+  client_id:
+    description: |
+      GitHub App Client ID.
+      Either client_id or app_id identifies the app.
+      client_id takes precedence when both are set.
+    required: false
+  app_private_key:
+    description: |
+      GitHub App Private Key.
+      Either app_private_key or aws_kms_key_id is required when the app is used.
+    required: false
+  aws_kms_key_id:
+    description: |
+      Key ID, key ARN, alias name, or alias ARN of an AWS KMS key holding the
+      GitHub App private key.
+      Set this instead of app_private_key when the private key is stored in AWS
+      KMS and can never be exported.
+    required: false
+  aws_region:
+    description: |
+      The AWS region of the KMS key.
+      It can be omitted when the KMS key input is an ARN, which carries the
+      region. Otherwise it falls back to the AWS_REGION or AWS_DEFAULT_REGION
+      environment variable.
+      It's shared by both apps unless securefix_aws_region is set.
+    required: false
+  aws_role_to_assume:
+    description: |
+      ARN of the AWS IAM role to assume with the GitHub OIDC token.
+      The job needs the permission `id-token: write`.
+      The credentials are kept inside this action and are never exported, so
+      later steps of the job can't see them.
+      Leave this unset to use the AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY and
+      AWS_SESSION_TOKEN environment variables instead, which is what
+      aws-actions/configure-aws-credentials exports.
+      It's shared by both apps unless securefix_aws_role_to_assume is set.
+    required: false
+
+  securefix_app_id:
+    description: |
+      GitHub App ID for Securefix Action.
+      Either securefix_client_id or securefix_app_id identifies the app.
+    required: false
+  securefix_client_id:
+    description: |
+      GitHub App Client ID for Securefix Action.
+      Either securefix_client_id or securefix_app_id identifies the app.
+      securefix_client_id takes precedence when both are set.
+    required: false
+  securefix_app_private_key:
+    description: |
+      GitHub App Private Key for Securefix Action.
+      Either securefix_app_private_key or securefix_aws_kms_key_id is required
+      when securefix_server_repository is set.
+    required: false
+  securefix_aws_kms_key_id:
+    description: |
+      Key ID, key ARN, alias name, or alias ARN of an AWS KMS key holding the
+      Securefix Action GitHub App private key.
+    required: false
+  securefix_aws_region:
+    description: |
+      The AWS region of securefix_aws_kms_key_id.
+      It falls back to aws_region.
+    required: false
+  securefix_aws_role_to_assume:
+    description: |
+      ARN of the AWS IAM role to assume for securefix_aws_kms_key_id.
+      It falls back to aws_role_to_assume.
+      Giving each key its own role keeps a role able to sign with only the key
+      it belongs to.
+    required: false
+  securefix_server_repository:
+    description: |
+      Securefix Action Server Repository
+    required: false
+
+  fix:
+    required: false
+    description: |
+      pinact run's --fix option
+    default: "true"
+  no_api:
+    required: false
+    description: |
+      pinact run's --no-api option
+    default: "false"
+  skip_push:
+    required: false
+    description: |
+      Skip pushing a commit
+    default: "false"
+  update:
+    required: false
+    description: |
+      pinact run's --update option
+    default: "false"
+  verify:
+    required: false
+    description: |
+      pinact run's --verify option
+    default: "false"
+  review:
+    required: false
+    description: |
+      Enable reviewdog integration to post PR reviews
+    default: "false"
+  github_token_for_review:
+    required: false
+    description: |
+      GitHub Access Token for reviewdog.
+      Falls back to github_token if not specified.
+      pull_requests:write - Post PR reviews
+  reviewdog_filter_mode:
+    required: false
+    description: |
+      reviewdog's -filter-mode option
+  reviewdog_fail_level:
+    required: false
+    default: error
+    description: |
+      reviewdog's -fail-level option
+  reviewdog_level:
+    required: false
+    description: |
+      reviewdog's -level option
+  min_age:
+    required: false
+    description: |
+      pinact run's --min-age option
+  verify_min_age:
+    required: false
+    description: |
+      pinact run's --verify-min-age option
+    default: "false"
+  includes:
+    required: false
+    description: |
+      pinact run's --include option.
+      Each value is newline separated.
+      Lines starting with # are ignored.
+  excludes:
+    required: false
+    description: |
+      pinact run's --exclude option.
+      Each value is newline separated.
+      Lines starting with # are ignored.
+  separator:
+    required: false
+    description: |
+      pinact run's --separator option.
+  branch_to_tags:
+    required: false
+    description: |
+      pinact run's --branch-to-tag option.
+      Each value is newline separated.
+      Lines starting with # are ignored.
+  config:
+    required: false
+    description: |
+      pinact run's --config option.
+  diff_file:
+    required: false
+    description: |
+      pinact run's --diff-file option.
+runs:
+  pre: chainguard-phonehome.js
+  using: node24
+  main: dist/index.js
