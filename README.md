@@ -11,6 +11,7 @@ Hardened by [Chainguard](https://www.chainguard.dev) from the upstream action at
 | v2.0.0 | [`v2.0.0`](https://github.com/chainguard-actions/suzuki-shunsuke-pinact-action/tree/v2.0.0) | [`cf51507`](https://github.com/suzuki-shunsuke/pinact-action/commit/cf51507d80d4d6522a07348e3d58790290eaf0b6) | — |
 | v3.0.0 | [`v3.0.0`](https://github.com/chainguard-actions/suzuki-shunsuke-pinact-action/tree/v3.0.0) | [`896d595`](https://github.com/suzuki-shunsuke/pinact-action/commit/896d595f299e71d65b9d28349d6956abe144390a) | [`HARDENING.md`](https://github.com/chainguard-actions/suzuki-shunsuke-pinact-action/blob/v3.0.0/HARDENING.md) |
 | v3.0.1 | [`v3.0.1`](https://github.com/chainguard-actions/suzuki-shunsuke-pinact-action/tree/v3.0.1) | [`2a42f29`](https://github.com/suzuki-shunsuke/pinact-action/commit/2a42f29b3397967439ed46e7650f3045f49699f9) | [`HARDENING.md`](https://github.com/chainguard-actions/suzuki-shunsuke-pinact-action/blob/v3.0.1/HARDENING.md) |
+| v3.1.0 | [`v3.1.0`](https://github.com/chainguard-actions/suzuki-shunsuke-pinact-action/tree/v3.1.0) | [`b1a1f46`](https://github.com/suzuki-shunsuke/pinact-action/commit/b1a1f46bb10f2908950d95f626ca8cc109e2cf7d) | [`HARDENING.md`](https://github.com/chainguard-actions/suzuki-shunsuke-pinact-action/blob/v3.1.0/HARDENING.md) |
 
 ## Privacy
 
